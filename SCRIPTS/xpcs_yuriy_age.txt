@@ -1,7 +1,7 @@
 [sample_description]
 name = Ta2O5_2.5um
-scan = scan0004
-dataset = 0002
+scan = scan0009
+dataset = 0003
 composition = Ta2O5
 temperature = 30C
 
@@ -11,7 +11,7 @@ sample_dir = ${data_dir}/RAW_DATA/${sample_description:name}/${sample_descriptio
 data_prefix = ${sample_description:name}_${sample_description:dataset}
 data_sufix = .h5
 first_file = 0
-last_file = 2000000
+last_file = 1400000
 skip = 10 
 fbin = 1
 age_bin = 20
