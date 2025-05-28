@@ -1,0 +1,54 @@
+[sample_description]
+name = pdpt_ac_sampl1
+scan = scan0008
+dataset = 0001
+composition = pdpt
+temperature = 30C
+
+[data_location]
+data_dir = /data/visitor/hc5971/id10/20250205/
+sample_dir = ${data_dir}/RAW_DATA/${sample_description:name}/${sample_description:name}_${sample_description:dataset}/
+data_prefix = ${sample_description:name}_${sample_description:dataset}
+data_sufix = .h5
+first_file = 1000
+last_file = 1001000
+skip = 20
+fbin = 1
+age_bin = 25
+dark_dir = /data/id10/inhouse/extraspace/17run2/IHR_WAXS/dark/dark3s/
+dark_prefix = img_
+first_dark = 1
+last_dark = 100
+result_dir = /data/id10-coh/inhouse/users/Yuriy/Tutorial_2024/Eloi/age/${sample_description:name}_${sample_description:dataset}/${sample_description:scan}_${data_location:first_file}_${data_location:last_file}/
+toplot = yes
+
+[exp_setup]
+geometry = WAXS
+wavelength = 0.57212
+detector_distance = 4.982
+lagtime = auto
+firstq = 2.75
+widthq = 0.1
+stepq = 0.1
+numberq = 3
+q_mask = ${data_location:result_dir}${sample_description:name}_qmask.npy
+beamstop_mask = bmask.npy
+dbx = 18698
+dby = 1024
+
+[correlator]
+method = event
+engine = CPU_age
+low_threshold = 50
+bottom_adu = 1410
+top_adu = 2100
+photon_adu = 1958
+max_number = 60000
+ttcf = 1
+
+[detector]
+det_name = eiger4m_v2
+pixels = 75.0e-6
+mask = /data/id10-coh/inhouse/detectors/eiger4m/eiger4m_mask_20240331.npy 
+flatfield = none
+sparse = yes

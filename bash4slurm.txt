@@ -1,0 +1,17 @@
+### RESERVE RESOURCES ON CLUSTER ###
+
+# nice => max 12h
+salloc --x11 --partition=nice --ntasks=1 --cpus-per-task=128 --mem-per-cpu=6G --time=12:00:00 srun --pty bash
+
+# nice-long => max 12h
+salloc --x11 --partition=nice-long --ntasks=1 --cpus-per-task=128 --mem-per-cpu=6G --time=7-00:00:00 srun --pty bash
+
+# with just srun (BETTER)
+srun -c 128 --mem-per-cpu=8000 --time=12:00:00 --pty bash -l
+
+### GO TO EXP FOLDER ###
+
+cd /data/visitor/hc6211/id10-coh/20250527/
+
+### RUN CODE TUNNEL ###
+./code tunnel
