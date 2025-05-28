@@ -6,7 +6,8 @@ A python library for XPCS data analysis. Use in combination with the library ID1
 
 Author: Fabio Brugnara
 """
-
+import os
+os.environ["MKL_INTERFACE_LAYER"] = "ILP64"
 
 ### IMPORT LIBRARIES ###
 import time, gc, io, contextlib
@@ -239,6 +240,8 @@ def gen_plots4mask(e4m_data, itime, Ith_high=None, Ith_low=None, Imaxth_high=Non
     ax4.set_title('Mean flux per px [ph/s/px]')                                                                                             
     ax4.set_xlabel('Y [px]')
     ax4.set_ylabel('X [px]')
+    ax4.set_xlim(0, Ny)
+    ax4.set_ylim(0, Nx)  
     ax4.plot(Y0, X0, 'ro', markersize=10)                                                                                                                   # plot the beam center
     if mask_geom is not None:                                                                                                                               # plot the mask geometry (mask_geom)
         for obj in mask_geom:                                                                                                                               # loop over the objects ...  
@@ -246,12 +249,12 @@ def gen_plots4mask(e4m_data, itime, Ith_high=None, Ith_low=None, Imaxth_high=Non
                 ax4.add_artist(plt.Circle((obj['Cy'], obj['Cx']), obj['r'], color='r', fill=False))
             elif obj['geom'] == 'Rectangle':
                 ax4.add_artist(plt.Rectangle((obj['y0'], obj['x0']), obj['yl'], obj['xl'], color='r', fill=False))
-            elif obj['geom'] == 'line':
-                #xx = (obj['x0'],obj['x0']-obj['x1']),1)
-                #mm = (obj['y1']-obj['y0'])/(obj['x1']-obj['x0'])
-                #qq = obj['y0'] - obj['x0']*mm
-                ax4.add_artist(plt.plot(xx, mm*xx+qq, linewidth=str(linewidth), color='r', fill=False))
-                pass
+            elif obj['geom'] == 'Line':
+                xx = np.array((obj['y0'],obj['y1'],1))
+                mm = (obj['x1']-obj['x0'])/(obj['y1']-obj['y0'])
+                qq = obj['x0'] - obj['y0']*mm
+                ax4.add_artist(plt.plot(xx, mm*xx+qq+int(obj['linewidth']/2), color='r')[0])
+                ax4.add_artist(plt.plot(xx, mm*xx+qq-int(obj['linewidth']/2), color='r')[0])
 
     # MEAN FLUX PER PX HISTOGRAM (ZOOM)
     ax5 = plt.subplot(413)                                                                                                                                  # create the subplot
@@ -262,7 +265,7 @@ def gen_plots4mask(e4m_data, itime, Ith_high=None, Ith_low=None, Imaxth_high=Non
     if Ith_high is not None: ax5.axvline(Ith_high, color='r', label='Ith_high')                                                                             # plot the Ith_high limit
     if Ith_low is not None:  ax5.axvline(Ith_low,  color='g', label='Ith_low')                                                                              # plot the Ith_low limit
     ax5.set_yscale('log')                                                                                                                                   # add the labels and legend
-    ax5.set_xlabel('Mean flux per px [ph/s/px]')                                                                                                            # ..   
+    ax5.set_xlabel('Mean flux per px [ph/s/px]')                                                                                                          # ..   
     ax5.legend()                                                                                                                                            # ..        
 
     # MEAN FLUX PER PX HISTOGRAM (FULL RANGE)
@@ -378,8 +381,10 @@ def gen_mask(e4m_data=None, itime=None, mask=None, mask_geom=None, Ith_high=None
                     mask = mask * ((Y>obj['y0']) & (Y<obj['y0']+obj['yl']) & (X>obj['x0']) & (X<obj['x0']+obj['xl']))
                 else:
                     mask = mask * ((Y<obj['y0']) | (Y>obj['y0']+obj['yl']) | (X<obj['x0']) | (X>obj['x0']+obj['xl']))
-            elif obj['geom']=='line':
-                pass
+            elif obj['geom']=='Line':
+                    mm = (obj['x1']-obj['x0'])/(obj['y1']-obj['y0'])
+                    qq = obj['x0'] - obj['y0']*mm
+                    mask = mask * ~(((X>mm*Y+qq-int(obj['linewidth']/2))) & (X<mm*Y+qq+int(obj['linewidth']/2)))
         mask = mask.flatten()
 
     # FILTER USING THRESHOLDS (Ith_high, Ith_low, Imaxth_high) & AND COMPUTING I_mean, I_max (if needed)
