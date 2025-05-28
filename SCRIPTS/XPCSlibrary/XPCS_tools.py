@@ -246,6 +246,8 @@ def gen_plots4mask(e4m_data, itime, Ith_high=None, Ith_low=None, Imaxth_high=Non
                 ax4.add_artist(plt.Circle((obj['Cy'], obj['Cx']), obj['r'], color='r', fill=False))
             elif obj['geom'] == 'Rectangle':
                 ax4.add_artist(plt.Rectangle((obj['y0'], obj['x0']), obj['yl'], obj['xl'], color='r', fill=False))
+            elif obj['geom'] == 'line':
+                pass
 
     # MEAN FLUX PER PX HISTOGRAM (ZOOM)
     ax5 = plt.subplot(413)                                                                                                                                  # create the subplot
@@ -372,6 +374,8 @@ def gen_mask(e4m_data=None, itime=None, mask=None, mask_geom=None, Ith_high=None
                     mask = mask * ((Y>obj['y0']) & (Y<obj['y0']+obj['yl']) & (X>obj['x0']) & (X<obj['x0']+obj['xl']))
                 else:
                     mask = mask * ((Y<obj['y0']) | (Y>obj['y0']+obj['yl']) | (X<obj['x0']) | (X>obj['x0']+obj['xl']))
+            elif obj['geom']=='line':
+                pass
         mask = mask.flatten()
 
     # FILTER USING THRESHOLDS (Ith_high, Ith_low, Imaxth_high) & AND COMPUTING I_mean, I_max (if needed)
