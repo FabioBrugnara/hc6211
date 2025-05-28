@@ -247,6 +247,10 @@ def gen_plots4mask(e4m_data, itime, Ith_high=None, Ith_low=None, Imaxth_high=Non
             elif obj['geom'] == 'Rectangle':
                 ax4.add_artist(plt.Rectangle((obj['y0'], obj['x0']), obj['yl'], obj['xl'], color='r', fill=False))
             elif obj['geom'] == 'line':
+                #xx = (obj['x0'],obj['x0']-obj['x1']),1)
+                #mm = (obj['y1']-obj['y0'])/(obj['x1']-obj['x0'])
+                #qq = obj['y0'] - obj['x0']*mm
+                ax4.add_artist(plt.plot(xx, mm*xx+qq, linewidth=str(linewidth), color='r', fill=False))
                 pass
 
     # MEAN FLUX PER PX HISTOGRAM (ZOOM)
