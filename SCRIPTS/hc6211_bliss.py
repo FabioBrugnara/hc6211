@@ -8,6 +8,8 @@ import numpy as np
 from xmlrpc.client import ServerProxy
 from gevent import sleep
 
+eiger4m_v2.processing.saving_sparse.file_exists_policy='overwrite'
+
 def now():
     return str(datetime.datetime.now())
 
@@ -37,3 +39,18 @@ def take_data_and_move(nimages,dt=0.01,dz=0.02,n_moves=4):
 def take_data(exp_time=0.001,n_frames=20_000):
     exp_pil = max(1,int(n_frames*exp_time/60_000+1))
     mtimescan(exp_time,int(n_frames),exp_pil)
+    
+    
+def qscan_macro():
+    delcoups = [1.7, 3.5, 8]
+    Zs = [2.7, 2.8, 2.9]
+    num_frames = 16_000_000
+    
+    itime = 0.001
+    
+    for ii in range(len(delcoups)):
+        print("Measuremnt at delcoup", delcoups[ii], "for ", num_frames*itime/3600, "hours")
+        umv(delcoup, delcoups[ii])
+        umv(zs, Zs[ii])
+        take_data(itime, num_frames)
+     
