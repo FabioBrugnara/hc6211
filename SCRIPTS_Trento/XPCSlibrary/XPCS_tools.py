@@ -802,7 +802,7 @@ def get_G2t_bybunch(e4m_data, Nbunch, mask=None, Nfi=None, Nff=None, Lbin=None):
 ######### GET g2 #############
 ##############################
 
-def get_g2(dt, G2t, cython=False):
+def get_g2(dt, G2t):
     '''
     Compute the g2 from the G2t matrix.
 
@@ -812,8 +812,6 @@ def get_g2(dt, G2t, cython=False):
         Time step between frames
     G2t: np.array
         G2t matrix
-    cython: boolean
-        If True, use the cython code to compute the g2
 
     Returns
     -------
@@ -824,22 +822,23 @@ def get_g2(dt, G2t, cython=False):
     '''
     
     t0 = time.time()
-    #if cython:
+
     print('Computing g2 (using cython code)...')
-    if G2t.dtype==np.float32:
-        g2, dg2 = mean_trace_float32(G2t)
-    elif G2t.dtype==np.float64:
-        g2, dg2 = mean_trace_float64(G2t)
-    else:
-        raise ValueError('G2t dtype not implemented in cython code!')
-    #else:
-    #    print('Computing g2...')
-    #    g2 = np.array([G2t.diagonal(i).mean() for i in range(1,G2t.shape[0])])
+    if    G2t.dtype==np.float32: g2, dg2 = mean_trace_float32(G2t)
+    elif  G2t.dtype==np.float64: g2, dg2 = mean_trace_float64(G2t)
+    else: raise ValueError('G2t dtype not implemented in cython code!')
     print('Done! (elapsed time =', round(time.time()-t0, 2), 's)\n')
 
-    dg2[dg2 == 0] = 1
+    g2, dg2 = g2[:-1], dg2[:-1]
+    idx = np.where(dg2==0)[0]
+    g2 = g2[:idx[0]] if len(idx)>0 else g2
+    dg2 = dg2[:idx[0]] if len(idx)>0 else dg2
 
-    return np.arange(1, len(g2)+1)*dt, g2, dg2 if cython else None
+    idx = np.where(np.isnan(dg2))[0]
+    g2 = g2[:idx[0]] if len(idx)>0 else g2
+    dg2 = dg2[:idx[0]] if len(idx)>0 else dg2
+
+    return np.arange(1, len(g2)+1)*dt, g2, dg2
 
 
 
@@ -870,23 +869,17 @@ def get_g2mt_fromling2(dt, g2, dg2=None):
 
     g2_multit = []
     t_multit = []
-    for i in range(int(np.log2(len(g2)))):
+    for i in range(int(np.log2(len(g2)))+1):
         g2_multit.append(g2[2**i-1:2**(i+1)-1].mean())
         t_multit.append (t [2**i-1:2**(i+1)-1].mean())
 
-    i +=1
-    g2_multit.append(g2[2**i-1:].mean())
-    t_multit.append(t[2**i-1:].mean())
-
     if dg2 is not None:
         dg2_multit = []
-        for i in range(int(np.log2(len(dg2)))):
-            dg2_multit.append(np.sqrt((dg2[2**i-1:2**(i+1)-1]**2).mean()))
-        i += 1
-        dg2_multit.append(np.sqrt((dg2[2**i-1:]**2).mean()))
+        for i in range(int(np.log2(len(dg2)))+1):
+            dg2_multit.append(np.sqrt((dg2[2**i-1:2**(i+1)-1]**2).sum()/len(dg2[2**i-1:2**(i+1)-1])**2+np.std(dg2[2**i-1:2**(i+1)-1])**2/len(dg2[2**i-1:2**(i+1)-1])))
+
         return np.array(t_multit), np.array(g2_multit), np.array(dg2_multit)
     else:
-
         return np.array(t_multit), np.array(g2_multit)
 
 def get_g2_mt(dt, g2):

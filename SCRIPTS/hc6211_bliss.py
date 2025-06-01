@@ -42,15 +42,21 @@ def take_data(exp_time=0.001,n_frames=20_000):
     
     
 def qscan_macro():
-    delcoups = [1.7, 3.5, 8]
-    Zs = [2.7, 2.8, 2.9]
-    num_frames = 16_000_000
+    delcoups = [10.4, 8, 6, 3.5, 1.7]
+    Zs = np.linspace(1.55, 3.2, 50)
+    Ys = [-0.48, -0.53, -0.58, -0.63, -0.68]
+    num_frames = [20000, 40000, 60000, 200000, 400000]
+    num_frames_base = [1.5e6, 2e6, 2e6, 3e6, 20e6]
     
     itime = 0.001
     
     for ii in range(len(delcoups)):
-        print("Measuremnt at delcoup", delcoups[ii], "for ", num_frames*itime/3600, "hours")
         umv(delcoup, delcoups[ii])
-        umv(zs, Zs[ii])
-        take_data(itime, num_frames)
+        umv(ys, Ys[ii])
+        for jj in range(len(Zs)):
+            umv(zs, Zs[jj])
+            take_data(itime, num_frames[ii])
+            
+        umv(zs, 1.5)
+        take_data(itime, int(num_frames_base[ii]))
      
